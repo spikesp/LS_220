@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <title></title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+      #result {
+        font-size: 48px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="result">
+    </div>
+    <form action="" method="get">
+      <fieldset>
+        <input type="text" name="number1" id="number1">
+        <select name="operation" id="operation">
+          <option value="addition">+</option>
+          <option value="subtraction">-</option>
+          <option value="multiplication">X</option>
+          <option value="division">/</option>
+        </select>
+        <input type="text" name="number2" id="number2">
+        <input type="submit" value="=">
+      </fieldset>
+    </form>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>
+      $(function() {
+        var $form = $('form');
+        var $input1 = $('#number1');
+        var $input2 = $('#number2');
+        var $select = $('#operation');
+        var $result = $('#result');
+
+        $form.submit(function(e) {
+          e.preventDefault();
+          var operation = $select.val();
+          var result = getResult(operation);
+          $result.text(result);
+        });
+
+        function getResult(operation) {
+          var num1 = Number($input1.val());
+          var num2 = Number($input2.val());
+
+          switch (operation) {
+            case 'addition':       return num1 + num2;
+            case 'subtraction':    return num1 - num2;
+            case 'multiplication': return num1 * num2;
+            case 'division':       return num1 / num2;
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <title></title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" media="print" href="stylesheets/print.css">
+    <style>
+      body {
+        background-color: lightgreen;
+        padding: 20px 0;
+        color: green;
+        font: normal 16px Helvetica, Arial, sans-serif;
+      }
+
+      main {
+        width: 450px;
+        background-color: #fff;
+        margin: 0 auto;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      fieldset { border: 0; }
+      dt { padding: 5px 0; }
+      dd { margin: 0; }
+      dd + dt { margin-top: 15px; }
+
+      input[type="text"] {
+        height: 30px;
+        font-size: 18px;
+        padding: 5px;
+        box-sizing: border-box;
+      }
+
+      input[type="submit"] {
+        height: 40px;
+        width: 100%;
+        background: linear-gradient(to bottom, red, darkred);
+        color: white;
+        border: 0;
+        border-radius: 7px;
+        box-sizing: border-box;
+        text-shadow: 1px 1px 5px rgba(80, 80, 80, .8);
+        font-size: 1em;
+        box-shadow: 0 0 1px 1px #780e24;
+      }
+
+      #name { width: 100%; }
+      #quantity { width: 50px; }
+
+      h1 {
+        text-align: center;
+        color: darkred;
+      }
+
+      h2 { font-size: 20px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <form action="" method="get">
+        <fieldset>
+          <legend><h2>Add an item</h2></legend>
+          <dl>
+            <dt><label for="name">Item name</label></dt>
+            <dd><input type="text" name="name" id="name" required></dd>
+            <dt><label for="quantity">Quantity</label></dt>
+            <dd><input type="text" name="quantity" id="quantity"></dd>
+          </dl>
+          <input type="submit" value="Add">
+        </fieldset>
+      </form>
+
+      <h1>Groceries</h1>
+      <ul id="groceries"></ul>
+    </main>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>
+      $(function() {
+        var $form = $('form');
+        var $nameInput = $('#name');
+        var $quantityInput = $('#quantity');
+        var $groceriesList = $('#groceries');
+
+        function addItem(name, quantity) {
+          var html = `<li>${quantity} ${name}</li>`;
+          $groceriesList.append(html);
+        }
+
+        $form.submit(function(e) {
+          e.preventDefault();
+          var name = $nameInput.val();
+          var quantity = $quantityInput.val() || 1;
+          addItem(name, quantity);
+          this.reset();
+        });
+      });
+    </script>
+  </body>
+</html>

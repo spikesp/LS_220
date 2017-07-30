@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <title></title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+    </style>
+  </head>
+  <body>
+    <form>
+      <input type="text" name="key" maxlength="1">
+      <input type="submit" value="Submit">
+    </form>
+    <a href="#">Toggle Accordion</a>
+    <div id="accordion">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. In tincidunt urna id ante dignissim, id pretium justo rhoncus. Nullam quam purus, mattis eu dictum at, congue id urna. In ultricies purus neque, quis rutrum nibh gravida in. Curabitur interdum, ipsum sit amet pellentesque venenatis, felis orci gravida tortor, nec venenatis erat erat ut risus. Donec fringilla magna a ligula vulputate, at tincidunt risus tristique. Phasellus tempus est magna, sit amet molestie leo luctus sed. Duis hendrerit, justo vestibulum interdum rutrum, ipsum mi gravida enim, vel egestas massa justo non dui. Morbi blandit nisl sem. Aenean ultricies, sapien ut ornare feugiat, mauris tellus efficitur est, sed fringilla felis tortor vel lectus. Pellentesque in neque vel leo interdum vestibulum. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Maecenas eros nisl, aliquet vel rutrum eget, varius a nisl. Curabitur ornare tempor nulla, eget faucibus neque rutrum at.
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>
+      $(function() {
+        var $form = $('form');
+        var $input = $('input[type=text]');
+        var $accordion = $('#accordion');
+        var $anchor = $('a');
+
+        var keyCharCode;
+        $form.submit(function(e) {
+          e.preventDefault();
+          keyCharCode = $input.val().charCodeAt(0);
+        });
+
+        $(document).on('keypress', function(e) {
+          if (e.which !== keyCharCode) return;
+          $anchor.trigger('click');
+        });
+
+        $anchor.click(function(e) {
+          e.preventDefault();
+          $accordion.slideToggle();
+        });
+      });
+    </script>
+  </body>
+</html>

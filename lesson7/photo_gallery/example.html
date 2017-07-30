@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <title>Fluid Layout Gallery</title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="gallery.css" />
+  </head>
+  <body>
+    <main>
+      <h1>My Photo Gallery</h1>
+      <div id="slideshow">
+        <figure>
+          <img src="http://placehold.it/1200x900" alt="" title="Photo 1" />
+          <figcaption>Photo 1</figcaption>
+        </figure>
+        <figure>
+          <img src="http://placehold.it/1200x900/fff/333" alt="" title="Photo 2" />
+          <figcaption>Photo 2</figcaption>
+        </figure>
+        <figure>
+          <img src="http://placehold.it/1200x900/66cc33/f0f0f0" alt="" title="Photo 3" />
+          <figcaption>Photo 3</figcaption>
+        </figure>
+        <figure>
+          <img src="http://placehold.it/1200x900/993535/aaa" alt="" title="Photo 4" />
+          <figcaption>Photo 4</figcaption>
+        </figure>
+        <ul>
+          <li><a href="#"><img class="selected" src="http://placehold.it/1200x900" alt="" title="Photo 1" /></a></li>
+          <li><a href="#"><img src="http://placehold.it/1200x900/fff/333" alt="" title="Photo 2" /></a></li>
+          <li><a href="#"><img src="http://placehold.it/1200x900/66cc33/f0f0f0" alt="" title="Photo 3" /></a></li>
+          <li><a href="#"><img src="http://placehold.it/1200x900/993535/aaa" alt="" title="Photo 4" /></a></li>
+        </ul>
+      </div>
+    </main>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>
+      // $(function() {
+      //   var $thumbnails = $('main li a');
+      //   var $images = $('main li img');
+      //   var $figures = $('#figure-container figure');
+
+      //   function showImage() {
+      //     var $selectedImage = $images.filter('.selected');
+      //     var selectedIndex = $images.index($selectedImage);
+      //     $figures.filter(':visible').stop().fadeOut(400);
+      //     $figures.eq(selectedIndex).stop().delay(400).fadeIn();
+      //   }
+
+      //   $thumbnails.click(function(e) {
+      //     e.preventDefault();
+      //     var $currentImage = $(this).children().eq(0);
+      //     $images.removeClass('selected');
+      //     $currentImage.addClass('selected');
+      //     showImage();
+      //   });
+      // });
+
+      $(function() {
+        var $slideshow = $("#slideshow"),
+            $nav = $slideshow.find("ul");
+
+        $nav.on("click", "a", function(e) {
+          e.preventDefault();
+          console.log('currentTarget: ' + e.currentTarget, 'target: ' + e.target);
+          var $li = $(e.currentTarget).closest("li"),
+              idx = $li.index();
+
+          $slideshow.find("figure").stop().filter(":visible").fadeOut(300);
+          $slideshow.find("figure").eq(idx).delay(300).fadeIn(300);
+          $nav.find(".active").removeClass("active");
+          $li.addClass("active");
+        });
+      });
+    </script>
+  </body>
+</html>
