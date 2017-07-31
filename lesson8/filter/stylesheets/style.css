@@ -1,0 +1,49 @@
+body {
+  background: #eee196;
+  font: normal 16px Helvetica, Arial, sans-serif;
+}
+
+#container {
+  width: 1000px;
+  margin: 0 auto;
+  background: #fff;
+  overflow: auto;
+  padding: 10px;
+}
+
+main {
+  width: 80%;
+  float: right;
+}
+
+aside {
+  float: left;
+  padding: 20px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+main li {
+  padding: 20px;
+}
+
+main li:hover {
+  background: #ccffd1;
+}
+
+main li + li {
+  border-top: 1px solid #bfbfbf;
+}
+
+input[type=checkbox] {
+  margin-right: 7px;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
