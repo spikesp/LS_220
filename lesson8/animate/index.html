@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <title></title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="stylesheets/style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="javascripts/app.js"></script>
+  </head>
+  <body>
+    <main id="column">
+      <div id="canvas">
+      </div>
+      <p><a class="control" data-link="start" href="#">Start</a> | <a class="control" data-link="stop" href="#">Stop</a></p>
+      <h1>Add a shape</h1>
+      <form action="" method="get">
+        <fieldset>
+          <legend><h2>Type</h2></legend>
+          <ul>
+            <li>
+              <label>
+                <input type="radio" name="shape" value="square" checked>
+                Square
+              </label>
+            </li>
+            <li>
+              <label>
+                <input type="radio" name="shape" value="circle">
+                Circle
+              </label>
+            </li>
+            <li>
+              <label>
+                <input type="radio" name="shape" value="star">
+                Star
+              </label>
+            </li>
+          </ul>
+        </fieldset>
+        <fieldset>
+          <legend>Starting Point</legend>
+          <ul>
+            <li>
+              <input type="number" name="start_x" placeholder="x:">
+            </li>
+            <li>
+              <input type="number" name="start_y" placeholder="y:">
+            </li>
+          </ul>
+        </fieldset>
+        <fieldset>
+          <legend>Ending Point</legend>
+          <ul>
+            <li>
+              <input type="number" name="end_x" placeholder="x:">
+            </li>
+            <li>
+              <input type="number" name="end_y" placeholder="y:">
+            </li>
+          </ul>
+        </fieldset>
+
+        <input id="submit" type="submit" value="Add">
+      </form>
+    </main>
+
+    <script>
+    </script>
+  </body>
+</html>

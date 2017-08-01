@@ -1,0 +1,66 @@
+body {
+  background: #7e0000;
+  font: normal 16px Helvetica, Arial, sans-serif;
+}
+
+#column {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 20px;
+}
+
+#canvas {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  background: linear-gradient(to bottom, #fff, #4e7ac7);
+  border: 1px solid #bfbfbf;
+}
+
+fieldset {
+  padding: 0;
+  margin: 0;
+  border: none;
+}
+
+ul {
+  list-style: none;
+}
+
+input[type=number],
+input[type=submit] {
+  width: 70px;
+  height: 25px;
+  font-size: 1em;
+  padding: 0 5px;
+}
+
+fieldset + fieldset ul {
+  margin-left: 0;
+  margin-top: 5px;
+  padding-left: 0;
+}
+
+fieldset + fieldset li {
+  display: inline-block;
+}
+
+.shape {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: #ffde20;
+}
+
+.square {
+
+}
+
+.circle {
+  border-radius: 100%;
+}
+
+.star {
+  background: transparent url('../images/icon_star.png') 0 0/cover no-repeat;
+}
