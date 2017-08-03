@@ -6,6 +6,9 @@ $(function() {
   function displayParentChildRelationship(e) {
     $(e.currentTarget).addClass("child");
     $(e.delegateTarget).addClass("parent");
+    console.log('target: ' + e.target,
+                'currentTarget: ' + e.currentTarget,
+                'delegateTarget: ' + e.delegateTarget);
   }
 
   // Basic event binding

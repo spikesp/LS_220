@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <title></title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.js"></script>
+    <style>
+    </style>
+  </head>
+  <body>
+    <script id="post" type="text/x-handlebars">
+      {{#each posts}}
+        <article>
+          <h1>{{title}}</h1>
+          <p><time>Posted on {{published}}</time></p>
+          {{{body}}}
+
+          {{#if tags}}
+          <ul>
+            {{#each tags}}
+              {{> tag}}
+            {{/each}}
+          </ul>
+          {{else}}
+          <p>Not tagged</p>
+          {{/if}}
+        </article>
+      {{/each}}
+    </script>
+    <script id="tag" type="text/x-handlebars">
+      <li>{{.}}</li>
+    </script>
+
+    <script>
+      var posts = [
+        {
+          title: 'Lorem ipsum dolor sit amet',
+          published: 'April 1, 2015',
+          body: 'Sed ut <strong>perspiciatis</strong> unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.',
+          tags: ['cool', 'sweet', 'sexy', 'awesome'],
+        },
+        {
+          title: 'Another post',
+          published: 'June 26, 2017',
+          body: 'hello kitty hi post',
+        }
+      ];
+
+      var context = {
+        posts: posts,
+      }
+
+      Handlebars.registerPartial('tag', $('#tag').html());
+
+      var source = $('#post').html();
+      var fn = Handlebars.compile(source);
+      var html = fn(context);
+      $('body').append(html);
+    </script>
+  </body>
+</html>

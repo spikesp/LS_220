@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<!-- saved from url=(0082)file:///Users/tiffany/resources/LAUNCH_SCHOOL/LS_220/lesson9/handlebars/index.html -->
+<html lang="en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title></title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="./index_files/jquery.min.js"></script>
+    <script src="./index_files/handlebars.js"></script>
+    <style>
+    </style>
+  </head>
+  <body>
+    <script id="post" type="text/x-handlebars">
+      <article>
+        <h1>{{title}}</h1>
+        <p><time>Posted on {{published}}</time></p>
+        {{{body}}}
+        <ul>
+          {{#each tags}}
+            {{> tag}}
+          {{/each}}
+        </ul>
+      </article>
+    </script>
+    <script id="tag" type="text/x-handlebars">
+      <li>{{.}}</li>
+    </script>
+
+    <script>
+      var post = {
+        title: 'Lorem ipsum dolor sit amet',
+        published: 'April 1, 2015',
+        body: 'Sed ut <strong>perspiciatis</strong> unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.',
+        tags: ['cool', 'sweet', 'sexy', 'awesome'],
+      };
+
+      var source = $('#post').html();
+      var fn = Handlebars.compile(source);
+      var html = fn(post);
+      $('body').append(html);
+
+      Handlebars.registerPartial('tag', $('#tag').html());
+
+    </script>
+  
+</body></html>
