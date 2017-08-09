@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <title></title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+    </style>
+  </head>
+  <body>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script>
+      var canvas = document.createElement('canvas');
+      var ctx = canvas.getContext('2d');
+
+      var preloader = {
+        path: 'assets/',
+        srcs: ['1.jpg', '2.jpg', '3.jpg'],
+        load: function() {
+          var $img;
+          this.srcs.forEach(function(src, index) {
+            $img = $('<img>');
+            $img.attr('src', this.path + src);
+            $img.on('load', manipulator.process.bind(manipulator));
+          }, this);
+        },
+      }
+
+      var manipulator = {
+        drawImage: function(img) {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+        },
+        getData: function() {
+          return ctx.getImageData(0, 0, canvas.width, canvas.height);
+        },
+        toGrayscale: function() {
+          var imageData = this.getData();
+          var data = imageData.data;
+          var dataLength = data.length
+          var grayValue;
+
+          for (var i = 0; i < dataLength; i += 4) {
+            grayValue = data[i]     * .3086 +
+                        data[i + 1] * .6094 +
+                        data[i + 2] * .0820;
+
+            data[i]     = grayValue;
+            data[i + 1] = grayValue;
+            data[i + 2] = grayValue;
+          }
+
+          ctx.putImageData(imageData, 0, 0);
+        },
+        writeImage: function() {
+          var img = document.createElement('img');
+          img.src = canvas.toDataURL();
+          $(document.body).append(img);
+        },
+        process: function(e) {
+          var img = e.target;
+          this.drawImage(img);
+          this.toGrayscale();
+          this.writeImage();
+        },
+      };
+
+      $(preloader.load.bind(preloader));
+    </script>
+  </body>
+</html>

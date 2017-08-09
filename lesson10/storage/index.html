@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <title></title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script>
+      function updateActive($e) {
+        $e.closest('ul').find('.active').removeClass('active');
+        $e.addClass('active');
+      }
+
+      function changeTab($e) {
+        var showIndex = $e.closest('li').index();
+        $('section article').hide().eq(showIndex).show();
+      }
+
+      function setBgColor(e) {
+        var color = $(e.target).val();
+        $(document.body).css('backgroundColor', color);
+      }
+
+      function setNote(note) {
+        $('textarea').val(note);
+      }
+
+      function initialize() {
+        var bgColor = localStorage.getItem('bgColor');
+        var note = localStorage.getItem('note');
+        var index = localStorage.getItem('activeTab');
+
+        if (bgColor) $('[value=' + bgColor + ']').trigger('click');
+        if (note) setNote(note);
+        if (index) $('li a').eq(index).trigger('click');
+      }
+
+      $(function() {
+        $('nav').on('click', 'a', function(e) {
+          e.preventDefault();
+          updateActive($(e.target));
+          changeTab($(e.target));
+        });
+
+        $('form').on('change', '[name=bg_color]', setBgColor);
+
+        $(window).on('unload', function() {
+          var note = $('[name=note]').val();
+          var color = $('[name=bg_color]').filter(':checked').val();
+          var index = $('section article').filter(':visible').index()
+
+          localStorage.setItem('activeTab', index);
+          localStorage.setItem('bgColor', color);
+          localStorage.setItem('note', note);
+        });
+
+        initialize();
+      });
+    </script>
+
+    <style>
+      body {
+        font: normal 16px Helvetica, Arial, sans-serif;
+      }
+
+      #column {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      main {
+        background: lightcyan;
+        border: 2px solid gray;
+        padding: 20px 40px;
+        box-shadow: 2px 2px 5px gray;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 0;
+      }
+
+      ul li {
+        display: inline-block;
+      }
+
+      li a {
+        text-decoration: none;
+        color: inherit;
+        display: inline-block;
+        background: lightcyan;
+        padding: 10px 20px;
+        width: 120px;
+        box-sizing: border-box;
+        text-align: center;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+        box-shadow: 2px 2px 5px;
+      }
+
+      ul .active {
+        background: lightblue;
+      }
+
+      #content article + article {
+        display: none;
+      }
+
+      textarea {
+        display: block;
+        margin-top: 10px;
+        resize: none;
+        width: 100%;
+      }
+
+      fieldset {
+        border: none;
+      }
+
+      @media (max-width: 600px) {
+        ul li {
+          display: block;
+        }
+
+        li a {
+          width: 100%;
+          border-radius: 0;
+        }
+
+        ul {
+          margin-bottom: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="column">
+      <nav>
+        <ul>
+          <li><a class="active" href="#">Home</a></li>
+          <li><a href="#">Stuff</a></li>
+          <li><a href="#">More Stuff</a></li>
+        </ul>
+      </nav>
+      <main>
+        <section id="content">
+          <article>
+            <h1>Home</h1>
+            <p>Aliquam fringilla dui sit amet egestas ultricies. Ut at ante nibh. Praesent accumsan euismod lectus, et feugiat diam. Vivamus at hendrerit lectus, id rutrum orci. Suspendisse rutrum libero non dui placerat, eget finibus quam interdum. Phasellus elit nibh, molestie nec vulputate ut, sodales ac risus. Proin porta erat non consectetur dapibus. Etiam ut dui augue. Nullam sit amet hendrerit felis, quis dapibus ipsum. Etiam blandit sapien volutpat, consectetur odio nec, varius nulla. Praesent justo lacus, scelerisque quis quam ac, volutpat cursus ligula.</p>
+          </article>
+          <article>
+            <h1>Stuff</h1>
+            <p>Aenean elementum fringilla turpis, consequat commodo odio convallis et. Ut placerat mauris a ornare pretium. Curabitur imperdiet sit amet nibh ut porttitor. Fusce nibh elit, vulputate quis rhoncus eu, vehicula quis sapien. Vivamus maximus, leo mattis lacinia tristique, nisl lectus elementum ex, porta tempor quam sem et enim. Praesent sollicitudin in risus sed ultricies. Sed hendrerit odio sed auctor condimentum. Pellentesque libero diam, pharetra at pharetra in, lacinia a ipsum.</p>
+          </article>
+          <article>
+            <h1>More Stuff</h1>
+            <p>Quisque placerat facilisis dolor eu eleifend. Praesent sodales maximus eleifend. Duis porta consequat mauris, eget porta turpis vehicula ac. Aliquam porta, diam non fermentum scelerisque, tortor libero feugiat nibh, non euismod nunc turpis et mi. Fusce eu risus gravida dui porta vehicula sed luctus purus. Ut in semper elit. Donec sodales fringilla tortor a placerat. Quisque vel ultrices enim. Integer sed lorem et eros ornare fringilla. Donec sed dictum ex. Duis ultricies dui in tincidunt ultrices. Pellentesque eget sapien non velit congue tincidunt.</p>
+          </article>
+        </section>
+
+        <form action="" method="get">
+          <fieldset>
+            <h2>Choose a background color: </h2>
+            <label>
+              <input type="radio" name="bg_color" value="black">
+              Black
+            </label>
+            <label>
+              <input type="radio" name="bg_color" value="blue">
+              Blue
+            </label>
+            <label>
+              <input type="radio" name="bg_color" value="red">
+              Red
+            </label>
+            <h2>Leave a note: </h2>
+            <textarea name="note" rows="5" cols="50"></textarea>
+          </fieldset>
+        </form>
+      </main>
+    </div>
+  </body>
+</html>

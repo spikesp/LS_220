@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <title></title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      body {
+        font: normal 14px Helvetica, Arial, sans-serif;
+      }
+
+      main {
+        width: 800px;
+        margin: 0 auto;
+      }
+
+      canvas {
+        border: 2px solid #bfbfbf;
+      }
+
+      form {
+        margin-top: 10px;
+      }
+
+      input[type=radio] {
+        display: none;
+      }
+
+      input[type=button],
+      input[type=radio] + label {
+        display: inline-block;
+        padding: 10px 20px;
+        border: 0;
+        background: #e5e5e5;
+        font-size: inherit;
+        margin-right: 10px;
+        cursor: pointer;
+      }
+
+      input[type=radio]:checked + label {
+        background: #4E7AC7;
+        color: #fff;
+      }
+
+      input[type=button]:focus {
+        outline: unset;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <canvas width="800px" height="500px"></canvas>
+      <form action="" method="get">
+        <input id="circle_choice" type="radio" name="shape" value="circle">
+        <label for="circle_choice">Circle</label>
+        <input id="square_choice" type="radio" name="shape" value="square">
+        <label for="square_choice">Square</label>
+        <input id="triangle_choice" type="radio" name="shape" value="triangle">
+        <label for="triangle_choice">Triangle</label>
+        <input id="clear_button" type="button" value="Clear canvas">
+        <label for="color_choice">Color: </label>
+        <input id="color_choice" type="text" name="color" value="#000">
+      </form>
+    </main>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script>
+      $(function() {
+        var canvas = document.querySelector('canvas');
+        var ctx = canvas.getContext('2d');
+
+        var drawingMethods = {
+          width: 20,
+          height: 20,
+          circle: function(x, y) {
+            ctx.beginPath();
+            ctx.arc(x, y, this.width / 2, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.closePath();
+          },
+          square: function(x, y) {
+            ctx.fillRect(x - this.width / 2, y - this.height / 2, this.width, this.height);
+          },
+          triangle: function(x, y) {
+            ctx.beginPath();
+            ctx.moveTo(x, y - this.height / 2);
+            ctx.lineTo(x + this.width / 2, y + this.height / 2);
+            ctx.lineTo(x - this.width / 2, y + this.height / 2);
+            ctx.lineTo(x, y - this.height / 2);
+            ctx.fill();
+            ctx.closePath();
+          },
+          draw: function(x, y) {
+            switch (this.shape) {
+              case 'circle':   return this.circle(x, y);
+              case 'square':   return this.square(x, y);
+              case 'triangle': return this.triangle(x, y);
+            }
+          },
+          clear: function() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+          },
+          setColor: function(color) {
+            ctx.fillStyle = color;
+          },
+        };
+
+        $('canvas').on('click', function(e) {
+          e.preventDefault();
+          var x = e.offsetX;
+          var y = e.offsetY;
+          drawingMethods.draw(x, y);
+        });
+
+        $('input[name=shape] + label').on('click', function(e) {
+          var $label = $(e.target);
+          var $input = $label.prev();
+          drawingMethods.shape = $input.val();
+        });
+
+        $('#clear_button').on('click', function(e) {
+          e.preventDefault();
+          drawingMethods.clear();
+        });
+
+        $('#color_choice').on('blur', function(e) {
+          e.preventDefault();
+          var $input = $(e.target);
+          var color = $input.val();
+          drawingMethods.setColor(color);
+        });
+      });
+    </script>
+  </body>
+</html>
