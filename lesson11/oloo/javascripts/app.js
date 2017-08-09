@@ -28,7 +28,7 @@ var Game = {
   },
 
   gameLost: function() {
-  return !this.guesses;
+    return !this.guesses;
   },
 
   duplicateGuess: function(letter) {
