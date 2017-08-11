@@ -1,0 +1,95 @@
+header {
+  background-color: #591e3a;
+  background: linear-gradient(to bottom, #40172a, #591e3a);
+  color: #fff;
+  padding: 20px 0;
+  font-size: 18px;
+}
+
+header p {
+  font-weight: 200;
+}
+
+main {
+  display: none;
+}
+
+nav {
+  background: #f2f2f2;
+  padding: 20px 0;
+}
+
+input[type=search] {
+  padding: 5px 10px;
+  height: 44px;
+  margin-top: 20px;
+}
+
+.contact {
+  padding: 40px;
+}
+
+.btn {
+  border: 1px solid #591e3a;
+  color: #591e3a;
+  background: #fff;
+}
+
+.btn:hover {
+  background: #591e3a;
+  color: #fff;
+}
+
+.delete {
+  margin-left: 10px;
+}
+
+.edit::before {
+  content: '\00270E';
+  margin-right: 5px;
+}
+
+.delete::before {
+  content: '\01F5D1';
+  margin-right: 10px;
+}
+
+fieldset {
+  padding: 40px 0 80px 0;
+  border-top: 1px solid #f2f2f2;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+#submit,
+#cancel {
+  width: 100%;
+}
+
+footer {
+  padding: 40px;
+  border-top: 1px solid #f2f2f2;
+}
+
+.tag {
+  display: inline-block;
+  background: #ceecf2;
+  color: #2e78a6;
+  border-radius: 5px;
+  padding: 0 10px;
+  margin-top: 5px;
+  cursor: pointer;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+@media (min-width: 768px) {
+  input[type=search] {
+    margin-top: 0;
+  }
+
+  .form-group .col-sm-4 {
+    text-align: right;
+  }
+}
