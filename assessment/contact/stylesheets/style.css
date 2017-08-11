@@ -84,6 +84,10 @@ footer {
   display: inline-block;
 }
 
+#message {
+  display: none;
+}
+
 @media (min-width: 768px) {
   input[type=search] {
     margin-top: 0;
@@ -91,5 +95,17 @@ footer {
 
   .form-group .col-sm-4 {
     text-align: right;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+  .contact:nth-child(3n+1) {
+    clear: both;
+  }
+}
+
+@media (min-width: 1200px) {
+  .contact:nth-child(4n+1) {
+    clear: both;
   }
 }

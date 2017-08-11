@@ -16,11 +16,10 @@ var ContactManager = {
     },
     submit: function(e) {
       e.preventDefault();
-      var action = $(e.target).closest('form').data('action');
       var obj = serializeArrayToObj($(e.target).serializeArray());
       obj.tags = this.tagStringsToArray(obj.tags);
 
-      switch (action) {
+      switch ($(e.target).closest('form').data('action')) {
         case 'add':
           this.addContact(obj);
           this.renderNewContact(obj);
@@ -38,38 +37,36 @@ var ContactManager = {
     },
     contacts: function(e) {
       e.preventDefault();
-      var action = $(e.target).data('action');
 
-      switch (action) {
+      switch ($(e.target).data('action')) {
         case 'edit':
           this.insertForm(this.getFormHtml($(e.target)));
           return this.transitionForm($('main'), $('form'));
         case 'delete':
-          var ok = confirm('Do you want to delete the contact?');
-          if (!ok) return;
-          var id = $(e.target).closest('.contact').data('id');
-          this.deleteContact(id);
+          if (!confirm('Do you want to delete the contact?')) return;
+          this.deleteContact($(e.target).closest('.contact').data('id'));
           this.renderDeletedContact(id);
       }
     },
     query: function(e) {
       e.preventDefault();
-      var q = $(e.target).val();
-      var filtered = this.filterByName(q);
-      console.log(filtered);
-      this.renderContacts(filtered);
+      this.renderContacts(this.filterByName($(e.target).val()));
+      this.clearFilteredTags();
     },
     tag: function(e) {
       e.preventDefault();
       var tagName = $(e.target).text();
-      var filtered = this.filterByTag(tagName);
-      this.renderContacts(filtered);
+      if (this.filteredTags.indexOf(tagName) > -1) return;
+      this.addFilteredTag(tagName);
       this.showFilteredTag(tagName);
+      this.renderContacts(this.filterByTag());
       this.clearSearchBar();
     },
     filteredTag: function(e) {
       e.preventDefault();
-      this.renderContacts(this.contacts);
+      this.removeFilteredTag($(e.target).text().replace(' x', ''));
+      this.removeShownFilteredTag(e.target);
+      this.renderContacts(this.filterByTag());
     },
     unload: function(e) {
       e.preventDefault();
@@ -77,7 +74,7 @@ var ContactManager = {
     },
   },
   tagStringsToArray: function(tags) {
-    if (!tags.length) return;
+    if (!tags) return [];
     return tags.split(/[, ]/);
   },
   registerHelpers: function() {
@@ -108,20 +105,39 @@ var ContactManager = {
       return re.test(contact.name);
     });
   },
-  filterByTag: function(tagName) {
+  filterByTag: function() {
     return this.contacts.filter(function(contact) {
-      if (!contact.tags) return false;
-      return contact.tags.some(function(tag) {
-        return tag.toLowerCase() === tagName.toLowerCase();
+      var tagString = contact.tags.join('');
+      return this.filteredTags.every(function(tagName) {
+        return new RegExp(tagName, 'i').test(tagString);
       });
-    });
+    }, this);
+  },
+  addFilteredTag: function(tagName) {
+    this.filteredTags.push(tagName);
+  },
+  removeFilteredTag: function(tagName) {
+    var idx = this.filteredTags.indexOf(tagName);
+    this.filteredTags.splice(idx, 1);
   },
   showFilteredTag: function(tagName) {
-    var $container = $('<div>', {class: 'col-xs-12', id: 'message'});
     var $tagName = $('<span>', {class: 'tag'}).text(tagName + ' x');
-    var $message = $('<span>', {class: 'h4'}).html('Showing contacts for: ');
-    $container.append($message).append($tagName);
-    $('#contacts').prepend($container);
+    $('#message').append($tagName);
+    this.toggleMessage(true);
+  },
+  removeShownFilteredTag: function(e) {
+    var $e = $(e);
+    if (!$e.siblings('.tag').length) this.toggleMessage(false);
+    $e.remove();
+  },
+  clearFilteredTags: function() {
+    if (!this.filteredTags.length > 0) return;
+    this.filteredTags.forEach(this.removeFilteredTag, this);
+    $('#message .tag').toArray().forEach(this.removeShownFilteredTag, this);
+    this.toggleMessage(false);
+  },
+  toggleMessage: function(bool) {
+    $('#message').toggle(bool);
   },
   getContact: function(id) {
     return this.contacts.filter(function(contact) {
@@ -191,7 +207,7 @@ var ContactManager = {
     $(window).on('unload', this.listeners.unload.bind(this));
     $('#query').on('keyup', this.listeners.query.bind(this));
     $('#contacts').on('click', '[class="tag filterable"]', this.listeners.tag.bind(this));
-    $('#contacts').on('click', '#message .tag', this.listeners.filteredTag.bind(this));
+    $('#message').on('click', '.tag', this.listeners.filteredTag.bind(this));
   },
   getLastId: function() {
     if (!this.contacts.length) return 0;
@@ -206,6 +222,7 @@ var ContactManager = {
     this.contacts = this.getCachedContacts() || [];
     this.id = this.getLastId();
     this.renderContacts(this.contacts);
+    this.filteredTags = [];
     setTimeout(this.transitionMain, 200);
     return this;
   },
