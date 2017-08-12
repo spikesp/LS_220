@@ -44,7 +44,8 @@ var ContactManager = {
           return this.transitionForm($('main'), $('form'));
         case 'delete':
           if (!confirm('Do you want to delete the contact?')) return;
-          this.deleteContact($(e.target).closest('.contact').data('id'));
+          var id = $(e.target).closest('.contact').data('id');
+          this.deleteContact(id);
           this.renderDeletedContact(id);
       }
     },
