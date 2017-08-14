@@ -6,6 +6,80 @@ function serializeArrayToObj(array) {
   return result;
 }
 
+var TodoList = {
+  dataPerMonth: function(array) {
+    this.sortByDate(array);
+    var dateString;
+
+    return array.reduce(function(obj, todo) {
+      dateString = todo.formattedDate;
+      if (!obj.hasOwnProperty(dateString)) {
+        obj[dateString] = 0;
+      }
+      obj[dateString] += 1;
+      return obj;
+    }, {});
+  },
+  filterByMonth: function(todos, month) {
+    return todos.filter(function(todo) {
+      if (isNaN(month)) {
+        if (!todo.date) return true;
+        return false;
+      } else {
+        if (!todo.date) return false;
+        return todo.date.getMonth() === month;
+      }
+    });
+  },
+  sortByDate: function() {
+    [].slice.call(arguments).forEach(function(array) {
+      array.sort(function(todoA, todoB) {
+        if (!todoA.date) return -1;
+        if (!todoB.date) return 1;
+        return todoB.date.getTime() - todoA.date.getTime();
+      });
+    });
+  },
+  updateCompleted: function(id) {
+    var todo = this.get(id);
+    var prev = todo.completed ? 'uncompleted' : 'completed';
+    var current = todo.completed ? 'completed' : 'uncompleted';
+    this[prev].splice(this[prev].indexOf(todo), 1);
+    this[current].push(todo);
+  },
+  lastId: function() {
+    if (!this.all.length) return 0;
+    return this.all.reduce(function(max, todo) {
+      return Math.max(max, todo.id);
+    }, -Infinity);
+  },
+  get: function(id) {
+    return this.all.filter(function(todo) {
+      return todo.id === id;
+    })[0];
+  },
+  delete: function(id) {
+    var todo = this.get(id);
+    var which = todo.completed ? 'completed' : 'uncompleted';
+    this.all.splice(this.all.indexOf(todo), 1);
+    this[which].splice(this[which].indexOf(todo), 1);
+  },
+  add: function(todo) {
+    this.all.push(todo);
+    if (todo.completed) {
+      this.completed.push(todo);
+    } else {
+      this.uncompleted.push(todo);
+    }
+  },
+  init: function() {
+    this.all = [];
+    this.completed = [];
+    this.uncompleted = [];
+    return this;
+  },
+};
+
 var Todo = {
   toggleCompleted: function() {
     this.completed = !this.completed;
@@ -35,7 +109,7 @@ var Todo = {
   },
 };
 
-var TodoManager = {
+var TodoView = {
   templates: {},
   listeners: {
     add: function(e) {
@@ -55,7 +129,7 @@ var TodoManager = {
       if (action === 'add') {
         this.addTodo(form);
         this.renderAllTodos();
-        this.renderNavAll();
+        this.renderNav();
         this.renderTotalCounts();
         $('nav .all').find('h2').trigger('click');
       }
@@ -63,8 +137,7 @@ var TodoManager = {
       if (action === 'edit') {
         this.persistSelected(function() {
           this.editTodo(form);
-          this.renderNavAll();
-          this.renderNavCompleted();
+          this.renderNav();
           this.renderTotalCounts();
         }.bind(this));
       }
@@ -79,7 +152,7 @@ var TodoManager = {
 
       var array = $(e.target).closest('form').serializeArray();
       var form = serializeArrayToObj(array);
-      if (this.getTodo(Number(form.id)).completed)
+      if (this.todos.get(Number(form.id)).completed)
         return this.fadeModal(false);
 
       var $todo = $('#todos').find('[data-id=' + form.id + ']');
@@ -93,21 +166,19 @@ var TodoManager = {
       this.persistSelected(function() {
         this.toggleCompleted(id);
         this.renderEditedTodo(id);
-        this.updatePartition(id);
-        this.renderNavCompleted();
+        this.todos.updateCompleted(id);
+        this.renderNav();
         this.renderTotalCounts();
       }.bind(this));
     },
     delete: function(e) {
       e.preventDefault();
       var id = $(e.target).closest('.todo').data('id');
-      var completed = this.getTodo(id).completed;
 
       this.persistSelected(function() {
-        this.deleteTodo(id);
+        this.todos.delete(id);
         this.renderDeletedTodo(id);
-        this.renderNavAll();
-        if (completed) this.renderNavCompleted();
+        this.renderNav();
         this.renderTotalCounts();
       }.bind(this));
     },
@@ -124,13 +195,13 @@ var TodoManager = {
       var $li = $(e.target).closest('li');
       var which = $li.closest('ul').attr('id');
       var month = Number($li.text().slice(0, 2)) - 1;
-      var completed = this.filterByMonth(this.completed, month);
+      var completed = this.todos.filterByMonth(this.todos.completed, month);
       this.toggleSelected($li);
       this.toggleHeading($li.data('heading'), $li.find('span').text());
 
       switch (which) {
         case 'all':
-          var uncompleted = this.filterByMonth(this.uncompleted, month);
+          var uncompleted = this.todos.filterByMonth(this.todos.uncompleted, month);
           return this.renderAllTodos(completed, uncompleted);
         case 'completed':
           return this.renderCompletedTodos(completed);
@@ -151,7 +222,7 @@ var TodoManager = {
       }
     },
     unload: function(e) {
-      localStorage.setItem('todos', JSON.stringify(this.todos));
+      localStorage.setItem('todos', JSON.stringify(this.todos.all));
     },
   },
   registerPartials: function() {
@@ -181,12 +252,12 @@ var TodoManager = {
   fadeModal: function(which) { $('#modal, #overlay').fadeToggle(which); },
   insertForm: function($form) { $('#modal').html($form) },
   getFormHtml: function(id) {
-    var todo = this.getTodo(id);
+    var todo = this.todos.get(id);
     var data = Object.assign({}, todo, {action: 'edit'})
     return this.templates.form(data);
   },
   setSelectValues: function(id) {
-    var todo = this.getTodo(id);
+    var todo = this.todos.get(id);
     if (!todo.date) return;
     $('[name=day]').val(todo.date.getDate());
     $('[name=month]').val(todo.date.getMonth());
@@ -198,39 +269,12 @@ var TodoManager = {
     if (form.day !== 'Day') args.push(Number(form.day));
     return new Date(...args);
   },
-  formatDate: function(date) {
-    if (!date) return 'No Due Date';
-    var month = String(date.getMonth() + 1);
-    var year = String(date.getFullYear()).slice(2);
-    if (month.length < 2) month = '0' + month;
-    return month + '/' + year;
-  },
-  sortTodosByDate: function() {
-    [].slice.call(arguments).forEach(function(array) {
-      array.sort(function(todoA, todoB) {
-        if (!todoA.date) return -1;
-        if (!todoB.date) return 1;
-        return todoB.date.getTime() - todoA.date.getTime();
-      });
-    });
-  },
-  getTodo: function(id) {
-    return this.todos.filter(function(todo) {
-      return todo.id === id;
-    })[0];
-  },
   renderTotalCounts: function() {
-    $('.total-count').text(this.todos.length);
-    $('.completed-count').text(this.completed.length);
-  },
-  deleteTodo: function(id) {
-    var todo = this.getTodo(id);
-    var which = todo.completed ? 'completed' : 'uncompleted';
-    this.todos.splice(this.todos.indexOf(todo), 1);
-    this[which].splice(this[which].indexOf(todo), 1);
+    $('.total-count').text(this.todos.all.length);
+    $('.completed-count').text(this.todos.completed.length);
   },
   editTodo: function(source) {
-    var todo = this.getTodo(Number(source.id));
+    var todo = this.todos.get(Number(source.id));
     source.date = this.makeDate(source)
     todo.edit(source);
   },
@@ -239,18 +283,17 @@ var TodoManager = {
     form.id = this.id;
     form.date = this.makeDate(form);
     var todo = Object.create(Todo).init(form);
-    this.todos.push(todo);
-    this.uncompleted.push(todo);
+    this.todos.add(todo);
   },
   renderDeletedTodo: function(id) {
     $('#todos').find('[data-id=' + id + ']').remove();
   },
   renderEditedTodo: function(id) {
     $todo = $('#todos').find('[data-id=' + id + ']');
-    $todo.replaceWith(this.templates.todo(this.getTodo(id)));
+    $todo.replaceWith(this.templates.todo(this.todos.get(id)));
   },
   toggleCompleted: function(id) {
-    this.getTodo(id).toggleCompleted();
+    this.todos.get(id).toggleCompleted();
   },
   toggleSelected: function($target) {
     $('nav').find('.selected').removeClass('selected');
@@ -260,27 +303,16 @@ var TodoManager = {
     var $span = $('<span>', {class: 'count'});
     $('main h1').html($span.text(count)).prepend(text);
   },
-  filterByMonth: function(todos, month) {
-    return todos.filter(function(todo) {
-      if (isNaN(month)) {
-        if (!todo.date) return true;
-        return false;
-      } else {
-        if (!todo.date) return false;
-        return todo.date.getMonth() === month;
-      }
-    });
-  },
   renderCompletedTodos: function(completed) {
-    completed = completed || this.completed;
-    this.sortTodosByDate(completed);
+    completed = completed || this.todos.completed;
+    this.todos.sortByDate(completed);
     var data = {completed: completed};
     $('#todos').html(this.templates.todos(data));
   },
   renderAllTodos: function(completed, uncompleted) {
-    completed = completed || this.completed;
-    uncompleted = uncompleted || this.uncompleted;
-    this.sortTodosByDate(completed, uncompleted);
+    completed = completed || this.todos.completed;
+    uncompleted = uncompleted || this.todos.uncompleted;
+    this.todos.sortByDate(completed, uncompleted);
     var data = {completed: completed, uncompleted: uncompleted};
     $('#todos').html(this.templates.todos(data));
   },
@@ -291,58 +323,18 @@ var TodoManager = {
     }
     $('#' + which).html(this.templates.navItems({months: data}));
   },
-  renderNavAll: function() {
-    this.allPerMonth = this.dataPerMonth(this.todos);
-    this.renderNavItems(this.allPerMonth, 'all');
-  },
-  renderNavCompleted: function() {
-    this.completedPerMonth = this.dataPerMonth(this.completed);
-    this.renderNavItems(this.completedPerMonth, 'completed');
-  },
-  dataPerMonth: function(array) {
-    this.sortTodosByDate(array);
-    var dateString;
-
-    return array.reduce(function(obj, todo) {
-      dateString = todo.formattedDate;
-      if (!obj.hasOwnProperty(dateString)) {
-        obj[dateString] = 0;
-      }
-      obj[dateString] += 1;
-      return obj;
-    }, {});
+  renderNav: function() {
+    var allPerMonth = this.todos.dataPerMonth(this.todos.all);
+    var completedPerMonth = this.todos.dataPerMonth(this.todos.completed);
+    this.renderNavItems(allPerMonth, 'all');
+    this.renderNavItems(completedPerMonth, 'completed');
   },
   getCachedTodos: function() {
     var array = JSON.parse(localStorage.getItem('todos')) || [];
-    var todos = [];
     array.forEach(function(item) {
       if (item.date) item.date = new Date(item.date);
-      todos.push(Object.create(Todo).init(item));
+      this.todos.add(Object.create(Todo).init(item));
     }, this);
-    return todos;
-  },
-  partitionCompleted: function(todo) {
-    if (todo.completed) {
-      this.completed.push(todo);
-    } else {
-      this.uncompleted.push(todo);
-    }
-  },
-  updatePartition: function(id) {
-    var todo = this.getTodo(id);
-    var prev = todo.completed ? 'uncompleted' : 'completed';
-    var current = todo.completed ? 'completed' : 'uncompleted';
-    this[prev].splice(this[prev].indexOf(todo), 1);
-    this[current].push(todo);
-  },
-  filterByCompleted: function() {
-    this.todos.forEach(this.partitionCompleted, this);
-  },
-  getLastId: function() {
-    if (!this.todos.length) return 0;
-    return this.todos.reduce(function(max, todo) {
-      return Math.max(max, todo.id);
-    }, -Infinity);
   },
   bind: function() {
     $('#add').on('click', this.listeners.add.bind(this));
@@ -360,13 +352,10 @@ var TodoManager = {
     this.registerPartials();
     this.cacheTemplates();
     this.bind();
-    this.completed = [];
-    this.uncompleted = [];
-    this.todos = this.getCachedTodos();
-    this.id = this.getLastId();
-    this.filterByCompleted();
-    this.renderNavCompleted();
-    this.renderNavAll();
+    this.todos = Object.create(TodoList).init();
+    this.id = this.todos.lastId();
+    this.getCachedTodos();
+    this.renderNav();
     this.renderAllTodos();
     this.renderTotalCounts();
     $('nav .all').find('h2').trigger('click');
@@ -374,4 +363,4 @@ var TodoManager = {
   },
 };
 
-var manager = Object.create(TodoManager).init();
+var view = Object.create(TodoView).init();
