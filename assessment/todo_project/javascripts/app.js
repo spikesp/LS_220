@@ -7,6 +7,35 @@ function serializeArrayToObj(array) {
 }
 
 var Todo = {
+  toggleCompleted: function() {
+    this.completed = !this.completed;
+  },
+  formatDate: function(date) {
+    if (!date) return 'No Due Date';
+    var month = String(date.getMonth() + 1);
+    var year = String(date.getFullYear()).slice(2);
+    if (month.length < 2) month = '0' + month;
+    return month + '/' + year;
+  },
+  edit: function(source) {
+    this.title = source.title;
+    this.description = source.description;
+    this.date = source.date;
+    this.formattedDate = this.formatDate(this.date);
+  },
+  init: function(params) {
+    this.id = params.id;
+    this.title = params.title;
+    this.description = params.description;
+    this.date = params.date;
+    this.formattedDate = this.formatDate(this.date);
+    this.completed = params.hasOwnProperty('completed') ?
+      params.completed : false;
+    return this;
+  },
+};
+
+var TodoManager = {
   templates: {},
   listeners: {
     add: function(e) {
@@ -32,17 +61,12 @@ var Todo = {
       }
 
       if (action === 'edit') {
-        var needsReflow = this.dateChange(form);
-        this.editTodo(form);
-
-        if (!needsReflow) {
-          this.renderEditedTodo(Number(form.id));
-        } else {
-          this.persistSelected(function() {
-            this.renderNavAll();
-            this.renderNavCompleted();
-          }.bind(this));
-        }
+        this.persistSelected(function() {
+          this.editTodo(form);
+          this.renderNavAll();
+          this.renderNavCompleted();
+          this.renderTotalCounts();
+        }.bind(this));
       }
 
       this.fadeModal(false);
@@ -101,11 +125,8 @@ var Todo = {
       var which = $li.closest('ul').attr('id');
       var month = Number($li.text().slice(0, 2)) - 1;
       var completed = this.filterByMonth(this.completed, month);
-      var text = $li.clone().find('span').remove().end().text();
-      var count = $li.find('span').text();
-
       this.toggleSelected($li);
-      this.toggleHeading(text, count);
+      this.toggleHeading($li.data('heading'), $li.find('span').text());
 
       switch (which) {
         case 'all':
@@ -118,12 +139,9 @@ var Todo = {
     navHeadings: function(e) {
       e.preventDefault();
       var $e = $(e.target);
-      var text = $e.clone().find('span').remove().end().text();
-      var count = $e.find('span').text();
       var which = $e.closest('section').attr('class');
-
       this.toggleSelected($e);
-      this.toggleHeading(text, count);
+      this.toggleHeading($e.data('heading'), $e.find('span').text());
 
       switch (which) {
         case 'all':
@@ -187,14 +205,6 @@ var Todo = {
     if (month.length < 2) month = '0' + month;
     return month + '/' + year;
   },
-  dateChange: function(form) {
-    var todoDate = this.getTodo(Number(form.id)).date;
-    var formDate = this.makeDate(form);
-    if (!formDate &&  todoDate) return true;
-    if ( formDate && !todoDate) return true;
-    if (!formDate && !todoDate) return false;
-    return formDate.getTime() !== todoDate.getTime();
-  },
   sortTodosByDate: function() {
     [].slice.call(arguments).forEach(function(array) {
       array.sort(function(todoA, todoB) {
@@ -220,27 +230,15 @@ var Todo = {
     this[which].splice(this[which].indexOf(todo), 1);
   },
   editTodo: function(source) {
-    var destination = this.getTodo(Number(source.id));
-    destination.title = source.title;
-    destination.description = source.description;
-    destination.date = this.makeDate(source)
-    destination.formattedDate = this.formatDate(destination.date);
+    var todo = this.getTodo(Number(source.id));
+    source.date = this.makeDate(source)
+    todo.edit(source);
   },
   addTodo: function(form) {
     this.id++;
-
-    var date = this.makeDate(form);
-    var formattedDate = this.formatDate(date);
-
-    var todo = {
-      id: this.id,
-      title: form.title,
-      description: form.description,
-      date: date,
-      formattedDate: formattedDate,
-      completed: false,
-    };
-
+    form.id = this.id;
+    form.date = this.makeDate(form);
+    var todo = Object.create(Todo).init(form);
     this.todos.push(todo);
     this.uncompleted.push(todo);
   },
@@ -252,8 +250,7 @@ var Todo = {
     $todo.replaceWith(this.templates.todo(this.getTodo(id)));
   },
   toggleCompleted: function(id) {
-    var todo = this.getTodo(id);
-    todo.completed = !todo.completed;
+    this.getTodo(id).toggleCompleted();
   },
   toggleSelected: function($target) {
     $('nav').find('.selected').removeClass('selected');
@@ -316,9 +313,11 @@ var Todo = {
     }, {});
   },
   getCachedTodos: function() {
-    var todos = JSON.parse(localStorage.getItem('todos')) || [];
-    todos.forEach(function(todo) {
-      if (todo.date) todo.date = new Date(todo.date);
+    var array = JSON.parse(localStorage.getItem('todos')) || [];
+    var todos = [];
+    array.forEach(function(item) {
+      if (item.date) item.date = new Date(item.date);
+      todos.push(Object.create(Todo).init(item));
     }, this);
     return todos;
   },
@@ -375,4 +374,4 @@ var Todo = {
   },
 };
 
-var todo = Object.create(Todo).init();
+var manager = Object.create(TodoManager).init();
