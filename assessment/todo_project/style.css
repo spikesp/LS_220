@@ -1,0 +1,373 @@
+@import url("whitespaces-reset.css");
+
+/* ---------- General Styles ---------- */
+
+.count {
+  display: inline-block;
+  background: #6b7292;
+  padding: 0 5px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+body {
+  font: 300 16px Helvetica, Arial, sans-serif;
+  color: #060606;
+  overflow-x: hidden;
+}
+
+body::after {
+  display: block;
+  content: "";
+  clear: both;
+}
+
+main,
+nav {
+  height: 800px;
+}
+
+main {
+  background: #fff;
+  width: 72%;
+  float: right;
+  padding: 60px 100px 0 20px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* ---------- Nav Styles ---------- */
+
+input#nav {
+  display: none;
+}
+
+input#nav:checked ~ #slide-menu {
+  display: block;
+}
+
+.hamburger {
+  position: absolute;
+  top: 10px;
+  font-size: 40px;
+  cursor: pointer;
+}
+
+nav {
+  background: #464f77;
+  width: 28%;
+  float: left;
+  color: #b2b5c3;
+  box-sizing: border-box;
+  text-align: center;
+  position: relative;
+}
+
+nav section {
+  padding-top: 60px;
+}
+
+nav li {
+  padding: 10px 0;
+  position: relative;
+}
+
+nav .selected {
+  background: #383f5f;
+  color: #fff;
+}
+
+nav .selected .count {
+  background: #148fd5;
+  color: #fff;
+}
+
+nav .count {
+  position: absolute;
+  right: 30px;
+  color: #b2b5c3;
+}
+
+nav h2 .count {
+  margin-top: 5px;
+}
+
+nav h2 img {
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+.completed li {
+  text-decoration: line-through;
+}
+
+h1 {
+  font-size: 21px;
+  font-weight: inherit;
+  color: #050505;
+  padding: 10px 0;
+}
+
+h2 {
+  position: relative;
+  font-size: 18px;
+  font-weight: inherit;
+  color: #cecfd8;
+  padding: 10px 0 10px 40px;
+  text-align: left;
+}
+
+/* ---------- Main Styles ---------- */
+
+input#nav:checked + main {
+  position: absolute;
+  left: 335px;
+}
+
+main .count {
+  background: #148fd5;
+  color: #fff;
+  margin-left: 20px;
+}
+
+main .todo {
+  border-top: 1px solid #e7e7e7;
+  position: relative;
+}
+
+main .todo img {
+  display: inline-block;
+}
+
+main .plus {
+  margin: 0 10px;
+  font-size: 24px;
+}
+
+main a {
+  color: #148fd5;
+  text-decoration: none;
+  padding: 13px 0;
+  display: inline-block;
+  cursor: pointer;
+}
+
+main .todo label {
+  display: inline-block;
+  padding: 13px;
+  width: 90%;
+  vertical-align: top;
+  box-sizing: border-box;
+}
+
+main .todo label:hover {
+  background: rgba(0,100,205, 0.2);
+}
+
+main .todo .checkbox {
+  margin-right: 10px;
+  display: inline-block;
+  background: transparent url('images/checkbox.png') 0 0 no-repeat;
+  width: 14px;
+  height: 14px;
+}
+
+main .todo .name {
+  cursor: pointer;
+}
+
+main .todo [data-checked=true].checkbox {
+  background-image: url('images/checked.png');
+}
+
+main .todo [data-checked=true].checkbox + .name {
+  text-decoration: line-through;
+  color: #b3b3b3;
+}
+
+.delete {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: inline-block;
+  width: 10%;
+  text-align: center;
+  padding: 13px 0;
+  cursor: pointer;
+
+}
+
+.delete:hover {
+  background: rgba(255, 0, 0, 0.4);
+}
+
+main::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+/* ---------- Modal Styles ---------- */
+
+#modal {
+  display: none;
+  position: absolute;
+  width: 575px;
+  z-index: 1;
+  background: #fff;
+  padding: 40px 40px 40px 30px;
+  box-sizing: border-box;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#modal form input[type="text"],
+select, textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 5px;
+  border: 1px solid #b3b3b3;
+}
+
+#modal select {
+  -webkit-appearance: none;
+  -webkit-border-radius: 0px;
+  background: #fff;
+  background: url("images/arrows.png") bottom 50% right 5px no-repeat;
+}
+
+#modal form dl {
+  margin-bottom: 25px;
+}
+
+#modal form dl::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+#modal form dt {
+  float: left;
+  color: #060606;
+  padding: 6px 0;
+}
+
+#modal form .content {
+  float: right;
+  width: 400px;
+  color: #070707;
+}
+
+#modal form select.third {
+  width: 29.17%;
+}
+
+#modal form .separator {
+  display: inline-block;
+  width: 25px;
+  text-align: center;
+}
+
+#modal textarea {
+  height: 140px;
+  resize: none;
+}
+
+#modal form .button {
+  width: 185px;
+  height: 40px;
+  color: #fff;
+  background: #148fd5;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+#modal form .button + .button {
+  margin-left: 20px;
+}
+
+#overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* ---------- Media Queries ---------- */
+
+@media screen and (max-width: 768px) {
+  .mobile {
+    display: block;
+  }
+
+  .desktop {
+    display: none;
+  }
+
+  main {
+    width: 100%;
+    padding-right: 20px;
+  }
+
+  nav {
+    width: 335px;
+  }
+}
+
+@media screen and (min-width: 769px) {
+  .mobile {
+    display: none;
+  }
+
+  .desktop {
+    display: block;
+  }
+
+  input#nav:checked + main {
+    position: static;
+    left: 335px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  #modal {
+    width: 90%;
+    top: 20px;
+  }
+
+  #modal form dt {
+    float: none;
+  }
+
+  #modal form .content {
+    float: none;
+    width: 100%;
+    text-align: center;
+  }
+
+  #modal form select.third {
+    margin: 0 0 10px 0;
+  }
+
+  #modal form select.third:last-child {
+    margin: 0;
+  }
+
+  #modal form select.third,
+  #modal form .button {
+    width: 100%;
+  }
+
+  #modal form .button + .button {
+    margin: 10px 0 0 0;
+  }
+
+  #modal form .separator {
+    display: none;
+  }
+}
