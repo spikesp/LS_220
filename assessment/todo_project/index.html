@@ -14,19 +14,19 @@
       <label for="nav" class="hamburger mobile">
         &#8801;
       </label>
-      <h1>All Todos<span class="count total-count"></span></h1>
+      <h1>All Todos<span class="count"></span></h1>
       <a id="add" href="#"><span class="plus">+</span>Add new todo</a>
       <ul id="todos">
       </ul>
     </main>
     <nav id="slide-menu" class="desktop">
       <section class="all">
-        <h2 class="selected"><img src="images/icon-all.png" alt="all todos icon">All Todos<span class="count total-count"></span></h2>
+        <h2 data-heading="All Todos" class="selected"><img src="images/icon-all.png" alt="all todos icon">All Todos<span class="count total-count"></span></h2>
         <ul id="all">
         </ul>
       </section>
       <section class="completed">
-        <h2><img src="images/icon-completed.png" alt="completed todos icon">Completed<span class="count completed-count">0</span></h2>
+        <h2 data-heading="Completed"><img src="images/icon-completed.png" alt="completed todos icon">Completed<span class="count completed-count">0</span></h2>
         <ul id="completed">
         </ul>
       </section>
@@ -37,7 +37,7 @@
 
     <script data-id="navItems" type="text/x-handlebars">
       {{#each months}}
-        <li>{{month}}<span class="count">{{count}}</span></li>
+        <li data-heading="{{month}}">{{month}}<span class="count">{{count}}</span></li>
       {{/each}}
     </script>
 

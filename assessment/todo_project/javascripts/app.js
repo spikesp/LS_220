@@ -6,16 +6,6 @@ function serializeArrayToObj(array) {
   return result;
 }
 
-function sortByDate() {
-  [].slice.call(arguments).forEach(function(array) {
-    array.sort(function(todoA, todoB) {
-      if (!todoA.date) return -1;
-      if (!todoB.date) return 1;
-      return todoB.date.getTime() - todoA.date.getTime();
-    });
-  });
-}
-
 var Todo = {
   templates: {},
   listeners: {
@@ -35,10 +25,10 @@ var Todo = {
 
       if (action === 'add') {
         this.addTodo(form);
-        $('nav .all').find('h2').trigger('click');
-        this.setAllPerMonth(this.todos);
-        this.renderNav();
+        this.renderAllTodos();
+        this.renderNavAll();
         this.renderTotalCounts();
+        $('nav .all').find('h2').trigger('click');
       }
 
       if (action === 'edit') {
@@ -48,10 +38,10 @@ var Todo = {
         if (!needsReflow) {
           this.renderEditedTodo(Number(form.id));
         } else {
-          this.setAllPerMonth(this.todos);
-          this.setCompletedPerMonth(this.todos);
-          this.renderAllTodos();
-          this.renderNav();
+          this.persistSelected(function() {
+            this.renderNavAll();
+            this.renderNavCompleted();
+          }.bind(this));
         }
       }
 
@@ -65,7 +55,8 @@ var Todo = {
 
       var array = $(e.target).closest('form').serializeArray();
       var form = serializeArrayToObj(array);
-      if (this.getTodo(Number(form.id)).completed) return;
+      if (this.getTodo(Number(form.id)).completed)
+        return this.fadeModal(false);
 
       var $todo = $('#todos').find('[data-id=' + form.id + ']');
       $todo.find('label').trigger('click');
@@ -74,24 +65,27 @@ var Todo = {
     check: function(e) {
       e.preventDefault();
       var id = $(e.target).closest('.todo').data('id');
-      this.toggleCompleted(id);
-      this.renderEditedTodo(id);
-      this.updatePartition(id);
-      this.renderAllTodos();
-      this.setCompletedPerMonth();
-      this.renderNav();
-      this.renderTotalCounts();
+
+      this.persistSelected(function() {
+        this.toggleCompleted(id);
+        this.renderEditedTodo(id);
+        this.updatePartition(id);
+        this.renderNavCompleted();
+        this.renderTotalCounts();
+      }.bind(this));
     },
     delete: function(e) {
       e.preventDefault();
       var id = $(e.target).closest('.todo').data('id');
       var completed = this.getTodo(id).completed;
-      this.deleteTodo(id);
-      this.renderDeletedTodo(id);
-      this.setAllPerMonth(this.todos);
-      if (completed) this.setCompletedPerMonth();
-      this.renderNav();
-      this.renderTotalCounts();
+
+      this.persistSelected(function() {
+        this.deleteTodo(id);
+        this.renderDeletedTodo(id);
+        this.renderNavAll();
+        if (completed) this.renderNavCompleted();
+        this.renderTotalCounts();
+      }.bind(this));
     },
     name: function(e) {
       e.preventDefault();
@@ -152,6 +146,20 @@ var Todo = {
     }, this);
     this.templates.addForm = this.templates.form({action: 'add'});
   },
+  persistSelected: function(cb) {
+    var $selected = $('nav').find('.selected');
+    var heading = $selected.data('heading');
+    var which = $selected.closest('section').attr('class');
+
+    cb();
+
+    var $target = $('nav .' + which).find('[data-heading="' +
+      heading + '"]');
+    if ($target.length)
+      return $target.trigger('click');
+    $('h1 .count').text('0');
+    this.renderAllTodos([], []);
+  },
   fadeModal: function(which) { $('#modal, #overlay').fadeToggle(which); },
   insertForm: function($form) { $('#modal').html($form) },
   getFormHtml: function(id) {
@@ -187,6 +195,15 @@ var Todo = {
     if (!formDate && !todoDate) return false;
     return formDate.getTime() !== todoDate.getTime();
   },
+  sortTodosByDate: function() {
+    [].slice.call(arguments).forEach(function(array) {
+      array.sort(function(todoA, todoB) {
+        if (!todoA.date) return -1;
+        if (!todoB.date) return 1;
+        return todoB.date.getTime() - todoA.date.getTime();
+      });
+    });
+  },
   getTodo: function(id) {
     return this.todos.filter(function(todo) {
       return todo.id === id;
@@ -211,6 +228,7 @@ var Todo = {
   },
   addTodo: function(form) {
     this.id++;
+
     var date = this.makeDate(form);
     var formattedDate = this.formatDate(date);
 
@@ -230,9 +248,8 @@ var Todo = {
     $('#todos').find('[data-id=' + id + ']').remove();
   },
   renderEditedTodo: function(id) {
-    var html = this.templates.todo(this.getTodo(id));
     $todo = $('#todos').find('[data-id=' + id + ']');
-    $todo.replaceWith($(html));
+    $todo.replaceWith(this.templates.todo(this.getTodo(id)));
   },
   toggleCompleted: function(id) {
     var todo = this.getTodo(id);
@@ -243,7 +260,7 @@ var Todo = {
     $target.addClass('selected');
   },
   toggleHeading: function(text, count) {
-    var $span = $('<span>', {class: 'count total-count'});
+    var $span = $('<span>', {class: 'count'});
     $('main h1').html($span.text(count)).prepend(text);
   },
   filterByMonth: function(todos, month) {
@@ -259,33 +276,34 @@ var Todo = {
   },
   renderCompletedTodos: function(completed) {
     completed = completed || this.completed;
+    this.sortTodosByDate(completed);
     var data = {completed: completed};
-    var html = this.templates.todos(data);
-    $('#todos').html(html);
+    $('#todos').html(this.templates.todos(data));
   },
   renderAllTodos: function(completed, uncompleted) {
     completed = completed || this.completed;
     uncompleted = uncompleted || this.uncompleted;
-    sortByDate(completed, uncompleted);
+    this.sortTodosByDate(completed, uncompleted);
     var data = {completed: completed, uncompleted: uncompleted};
-    var html = this.templates.todos(data);
-    $('#todos').html(html);
-  },
-  renderNav: function() {
-    this.renderNavItems(this.allPerMonth, 'all');
-    this.renderNavItems(this.completedPerMonth, 'completed');
+    $('#todos').html(this.templates.todos(data));
   },
   renderNavItems: function(dataObj, which) {
     var data = [];
     for (key in dataObj) {
       data.push({month: key, count: dataObj[key]});
     }
-
-    var html = this.templates.navItems({months: data});
-    $('#' + which).html(html);
+    $('#' + which).html(this.templates.navItems({months: data}));
+  },
+  renderNavAll: function() {
+    this.allPerMonth = this.dataPerMonth(this.todos);
+    this.renderNavItems(this.allPerMonth, 'all');
+  },
+  renderNavCompleted: function() {
+    this.completedPerMonth = this.dataPerMonth(this.completed);
+    this.renderNavItems(this.completedPerMonth, 'completed');
   },
   dataPerMonth: function(array) {
-    sortByDate(array);
+    this.sortTodosByDate(array);
     var dateString;
 
     return array.reduce(function(obj, todo) {
@@ -296,12 +314,6 @@ var Todo = {
       obj[dateString] += 1;
       return obj;
     }, {});
-  },
-  setAllPerMonth: function() {
-    this.allPerMonth = this.dataPerMonth(this.todos);
-  },
-  setCompletedPerMonth: function() {
-    this.completedPerMonth = this.dataPerMonth(this.completed);
   },
   getCachedTodos: function() {
     var todos = JSON.parse(localStorage.getItem('todos')) || [];
@@ -346,7 +358,6 @@ var Todo = {
     $(window).on('unload', this.listeners.unload.bind(this));
   },
   init: function() {
-    this.registerHelpers();
     this.registerPartials();
     this.cacheTemplates();
     this.bind();
@@ -355,11 +366,11 @@ var Todo = {
     this.todos = this.getCachedTodos();
     this.id = this.getLastId();
     this.filterByCompleted();
-    this.setAllPerMonth(this.todos);
-    this.setCompletedPerMonth(this.completed);
+    this.renderNavCompleted();
+    this.renderNavAll();
     this.renderAllTodos();
-    this.renderNav();
     this.renderTotalCounts();
+    $('nav .all').find('h2').trigger('click');
     return this;
   },
 };
