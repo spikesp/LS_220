@@ -21,7 +21,7 @@
     </main>
     <nav id="slide-menu" class="desktop">
       <section class="all">
-        <h2 data-heading="All Todos" class="selected"><img src="images/icon-all.png" alt="all todos icon">All Todos<span class="count total-count"></span></h2>
+        <h2 data-item="h2" data-heading="All Todos" class="selected"><img src="images/icon-all.png" alt="all todos icon">All Todos<span class="count total-count"></span></h2>
         <ul id="all">
         </ul>
       </section>
@@ -37,7 +37,7 @@
 
     <script data-id="navItems" type="text/x-handlebars">
       {{#each months}}
-        <li data-heading="{{month}}">{{month}}<span class="count">{{count}}</span></li>
+        <li data-item="li" data-heading="{{month}}">{{month}}<span class="count">{{count}}</span></li>
       {{/each}}
     </script>
 
