@@ -111,15 +111,17 @@ var Todo = {
 
 var TodoView = {
   templates: {
-    registerPartials: function() {
-      Handlebars.registerPartial('todos', $('[data-id=todos]').html());
-      Handlebars.registerPartial('todo', $('[data-id=todo]').html());
-    },
-    cacheTemplates: function() {
-      $('[type="text/x-handlebars"]').toArray().forEach(function(e) {
-        this.templates[$(e).data('id')] = Handlebars.compile($(e).html())
-      }, this);
-      this.templates.addForm = this.templates.form({action: 'add'});
+    utility : {
+      registerPartials: function() {
+        Handlebars.registerPartial('todos', $('[data-id=todos]').html());
+        Handlebars.registerPartial('todo', $('[data-id=todo]').html());
+      },
+      cacheTemplates: function() {
+        $('[type="text/x-handlebars"]').toArray().forEach(function(e) {
+          this.templates[$(e).data('id')] = Handlebars.compile($(e).html())
+        }, this);
+        this.templates.addForm = this.templates.form({action: 'add'});
+      },
     },
   },
 
@@ -151,6 +153,21 @@ var TodoView = {
     main: function() {
       $('nav .all').find('h2').trigger('click');
     },
+    nav: function() {
+      var allPerMonth = this.todoList.returnDataPerMonth(this.todoList.all);
+      var completedPerMonth = this.todoList.returnDataPerMonth(this.todoList.completed);
+      this.render.utility.renderNavItems.call(this, allPerMonth, 'all');
+      this.render.utility.renderNavItems.call(this, completedPerMonth, 'completed');
+      $('.total-count').text(this.todoList.all.length);
+      $('.completed-count').text(this.todoList.completed.length);
+    },
+    selectValues: function(id) {
+      var todo = this.todoList.get(id);
+      if (!todo.date) return;
+      $('[name=day]').val(todo.date.getDate());
+      $('[name=month]').val(todo.date.getMonth());
+      $('[name=year]').val(todo.date.getFullYear());
+    },
     deletedTodo: function(id) {
       $('#todos').find('[data-id=' + id + ']').remove();
     },
@@ -170,21 +187,6 @@ var TodoView = {
       this.todoList.sortByDate(completed, uncompleted);
       var data = {completed: completed, uncompleted: uncompleted};
       $('#todos').html(this.templates.todos(data));
-    },
-    nav: function() {
-      var allPerMonth = this.todoList.returnDataPerMonth(this.todoList.all);
-      var completedPerMonth = this.todoList.returnDataPerMonth(this.todoList.completed);
-      this.render.utility.renderNavItems.call(this, allPerMonth, 'all');
-      this.render.utility.renderNavItems.call(this, completedPerMonth, 'completed');
-      $('.total-count').text(this.todoList.all.length);
-      $('.completed-count').text(this.todoList.completed.length);
-    },
-    selectValues: function(id) {
-      var todo = this.todoList.get(id);
-      if (!todo.date) return;
-      $('[name=day]').val(todo.date.getDate());
-      $('[name=month]').val(todo.date.getMonth());
-      $('[name=year]').val(todo.date.getFullYear());
     },
     utility : {
       getFormHtml: function(id) {
@@ -326,10 +328,8 @@ var TodoView = {
       this.toggle.heading.call(this, $e.data('heading'), $e.find('span').text());
 
       switch (which) {
-        case 'all':
-          return this.render.allTodos.call(this, completed, uncompleted);
-        case 'completed':
-          return this.render.completedTodos.call(this, completed);
+        case 'all': return this.render.allTodos.call(this, completed, uncompleted);
+        case 'completed': return this.render.completedTodos.call(this, completed);
       }
     },
     unload: function(e) {
@@ -363,8 +363,8 @@ var TodoView = {
     this.setup.restoreCachedTodos.call(this);
     this.id = this.todoList.lastId();
     this.setup.bind.call(this);
-    this.templates.registerPartials.call(this);
-    this.templates.cacheTemplates.call(this);
+    this.templates.utility.registerPartials.call(this);
+    this.templates.utility.cacheTemplates.call(this);
     this.render.nav.call(this);
     this.render.main.call(this);
     return this;
